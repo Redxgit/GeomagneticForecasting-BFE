@@ -11,7 +11,7 @@ The data will be downloaded from the CDAWeb, the SYM and ASY indices will be dow
 The repository contains 5 notebooks
 
 * ``0-download-and-save-data.ipynb``: Downloads the whole timeline for the SYM-H index which will be used in the `1-set-expansion.ipynb` notebook, the ACE MAG and SWEPAM datasets and the SYM-H for the selected storms that will be used in the remaining notebooks. The data will be downloaded from NASA's CDAWeb using the cdasws package.
-* 
+  
 * ``1-set-expansion.ipynb``: Contains the expansion of the original Siciliano set (https://doi.org/10.1029/2020SW002589) using the storms identified in (https://doi.org/10.1007/s11069-023-06241-1). The original subsets are maintained and the new storms are properly added to the subsets. Additionally, the storms for which the test key parameters are available are used in a second test set.
 
 * ``2-comparison-rmse-bfe.ipynb``: Contains the comparison of the RMSE and the BFE on a persistence model on all the storms and to create the comparison figures of the paper.
