@@ -1,0 +1,15 @@
+cdasws==1.7.43
+DateTimeRange==2.2.0
+ipython==8.16.1
+matplotlib==3.8.0
+natsort==8.4.0
+numpy==1.26.3
+pandas==2.1.4
+scikit_learn==1.3.1
+scipy==1.11.4
+seaborn==0.13.1
+spacepy==0.4.1
+tensorflow==2.14.0
+torch==2.1.2
+torchinfo==1.8.0
+tqdm==4.66.1
