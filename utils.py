@@ -41,121 +41,6 @@ SUMMARY_COLUMNS = ["Storm index", "Subset", "BFE"] + [
     f"{metric} {sect_name}" for metric in METRICS for sect_name in SECT_NAMES
 ]
 
-"""
-def evaluate_sym_metrics(
-    df, indices, plot_graphs=True, save_graphs=False, subsets="all", label_name="SYM_H"
-):
-    sum_sym = []
-    all_preds = []
-
-    print_colored("Evaluating for SYM-H index", color="green")
-    if subsets == "test":
-        subset_data = [
-            (storm_dates.TEST_STORMS, "Test storms"),
-        ]
-    elif subsets == "test_key":
-        subset_data = [
-            (storm_dates.TEST_KEY_STORMS, "Test key storms"),
-        ]
-    else:
-        subset_data = [
-            (storm_dates.TEST_STORMS, "Test storms"),
-            (storm_dates.TEST_KEY_STORMS, "Test key storms"),
-        ]
-
-    for subset, subset_name in subset_data:
-        print_colored(f"Evaluating {subset_name}", color="green")
-        for start_date, end_date, storm_index, checksum in subset:
-            sd = pd.to_datetime(start_date)
-            ed = pd.to_datetime(end_date)
-
-            storm_eval = df[sd:ed]
-            labels = indices[sd:ed][[label_name]].copy()
-
-            assert sd == labels.index[0]
-            assert ed == labels.index[-1]
-            assert labels[label_name].sum() == checksum
-
-            if len(storm_eval) == len(labels):
-                storm = labels.join(storm_eval)
-                all_preds.append(storm[sd:ed])
-                if plot_graphs:
-                    plot_prediction_sym(
-                        storm,
-                        lookahead=1,
-                        storm_index=storm_index,
-                        save_img=save_graphs,
-                    )
-                sum_sym.append(
-                    evaluate_storm_sym(
-                        storm, lookahead=1, storm_index=storm_index, subset=subset_name
-                    )
-                )
-            elif len(storm_eval) == 0:
-                print_colored(
-                    f"Test storm {storm_index} from {sd} to {ed} is missing, 0 samples found",
-                    "red",
-                )
-                print_colored(
-                    f"\texpected samples: {len(labels)}, found samples: {len(storm_eval)}",
-                    "red",
-                )
-            else:
-                storm = labels.join(storm_eval)
-                all_preds.append(storm[sd:ed])
-                print_colored(
-                    f"Test storm {storm_index} from {sd} to {ed} is partilly missing",
-                    "yellow",
-                )
-                print_colored(
-                    f"\texpected samples: {len(labels)}, found samples: {len(storm_eval)}",
-                    "yellow",
-                )
-
-    sum_sym = pd.concat(sum_sym)
-    sum_sym = pd.concat(
-        [
-            sum_sym,
-            pd.DataFrame(
-                data=[
-                    [
-                        "Mean:",
-                        "-",
-                        np.round(np.nanmean(sum_sym[sum_sym.columns[2]]), 3),
-                        np.round(np.nanmean(sum_sym[sum_sym.columns[3]]), 3),
-                        np.round(np.nanmean(sum_sym[sum_sym.columns[4]]), 3),
-                        np.round(np.nanmean(sum_sym[sum_sym.columns[5]]), 3),
-                        np.round(np.nanmean(sum_sym[sum_sym.columns[6]]), 3),
-                        np.round(np.nanmean(sum_sym[sum_sym.columns[7]]), 3),
-                        np.round(np.nanmean(sum_sym[sum_sym.columns[8]]), 3),
-                        np.round(np.nanmean(sum_sym[sum_sym.columns[9]]), 3),
-                        np.round(np.nanmean(sum_sym[sum_sym.columns[10]]), 3),
-                        np.round(np.nanmean(sum_sym[sum_sym.columns[11]]), 3),
-                    ]
-                ],
-                columns=[
-                    sum_sym.columns[0],
-                    sum_sym.columns[1],
-                    sum_sym.columns[2],
-                    sum_sym.columns[3],
-                    sum_sym.columns[4],
-                    sum_sym.columns[5],
-                    sum_sym.columns[6],
-                    sum_sym.columns[7],
-                    sum_sym.columns[8],
-                    sum_sym.columns[9],
-                    sum_sym.columns[10],
-                    sum_sym.columns[11],
-                ],
-            ),
-        ],
-        ignore_index=True,
-    )
-    all_preds = pd.concat(all_preds)
-    return all_preds, sum_sym
-"""
-
-
 def print_colored(str_to_print, color):
     print(f'{COLORS[color]}{str_to_print}{COLORS["reset"]}')
 
@@ -221,6 +106,8 @@ def plot_prediction_sym(
         prop={"size": 12},
     )
     leg.get_frame().set_edgecolor("black")
+    for l in leg.get_lines():
+        l.set_linewidth(3.0)
     plt.setp(ax.spines.values(), lw=2, color="black", alpha=1)
 
     min_sym = df[og_col].min()
@@ -478,25 +365,26 @@ def plot_comparison_sym(
     )
 
     ax.plot(0, 0, label="Samples count", color="green")
-    ax.fill_between(
-        bfe_plot.index,
-        bfe_plot.values,
-        bfe_comparison_plot.values,
-        where=bfe_plot.values > bfe_comparison_plot.values,
-        alpha=0.2,
-        interpolate=True,
-        color="gray",
-    )
+    if len(bfe_plot.values ) == len(bfe_comparison_plot.values):
+        ax.fill_between(
+            bfe_plot.index,
+            bfe_plot.values,
+            bfe_comparison_plot.values,
+            where=bfe_plot.values > bfe_comparison_plot.values,
+            alpha=0.2,
+            interpolate=True,
+            color="gray",
+        )
 
-    ax.fill_between(
-        bfe_plot.index,
-        bfe_plot.values,
-        bfe_comparison_plot.values,
-        where=bfe_plot.values < bfe_comparison_plot.values,
-        alpha=0.2,
-        interpolate=True,
-        color="blue",
-    )
+        ax.fill_between(
+            bfe_plot.index,
+            bfe_plot.values,
+            bfe_comparison_plot.values,
+            where=bfe_plot.values < bfe_comparison_plot.values,
+            alpha=0.2,
+            interpolate=True,
+            color="blue",
+        )
 
     ax.set_ylim(0, ax.get_ylim()[1])
     ax.tick_params(axis="both", which="major", labelsize=14, width=2, length=10)
